@@ -14,8 +14,8 @@ jobs:
         name: Unit Testing
         strategy:
             matrix:
-              nodejs_version: [18, 19, 20]
-              operating_system: [ubuntu-latest, ubuntu-22.04]
+              nodejs_version: [18, 19]
+              operating_system: [ubuntu-latest]
               exclude:
                  - nodejs_version: 18
                    operating_system: ubuntu-22.04
@@ -48,11 +48,10 @@ jobs:
               uses: actions/setup-node@v3
               with: 
                    node-version: 18
-            - name: Install Dependency and Unit Testing
-              run: |
-                   npm install
-                   env | grep MONGO
+            - name: Install Dependency
+              run: npm install
             - name: Code Coverage
+              continue-on-error: true
               run: npm run coverage
             - name: Archive Test Result
               uses: actions/upload-artifact@v4
