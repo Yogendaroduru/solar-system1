@@ -32,7 +32,7 @@ jobs:
               with:
                  path: node_modules
                  key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}    
-                              
+
             - name: Install Dependency and Unit Testing
               run: |
                    npm install
@@ -72,6 +72,19 @@ jobs:
                 name: Code-Coverage-Result
                 path: coverage
                 retention-days: 1
+    docker:
+        name: Containerization
+        needs: [unit-testing, code-coverage]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout 
+              uses: actions/checkout@v4
+            - name: Dockerhub Login
+              uses: docker/login-action@3
+              with:
+                  username: ${{ secrets.username }} 
+                  password: ${{ secrets.password }}
+
             
             
             
