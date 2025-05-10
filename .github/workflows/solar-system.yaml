@@ -12,6 +12,8 @@ env:
 jobs:
     unit-testing:
         name: Unit Testing
+        container:
+            image: node:18
         services:
             mongo-db:
               image: siddharth67/mongo-db:non-prod
@@ -21,21 +23,21 @@ jobs:
             MONGO_URL: 'mongodb://localhost:27017/superData'
             MONGO_USERNAME: non-prod-user
             MONGO_PASSWORD: non-prod-password
-        strategy:
-            matrix:
-              nodejs_version: [18, 19]
-              operating_system: [ubuntu-latest]
-              exclude:
-                 - nodejs_version: 18
-                   operating_system: ubuntu-22.04
-        runs-on: ${{ matrix.operating_system }}
+#        strategy:
+#            matrix:
+#              nodejs_version: [18, 19]
+#              operating_system: [ubuntu-latest]
+#              exclude:
+#                 - nodejs_version: 18
+#                   operating_system: ubuntu-22.04
+        runs-on: ubuntu-latest
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4
-            - name: Setup NodeJs Version -${{ matrix.nodejs_version }}
-              uses: actions/setup-node@v3
-              with: 
-                   node-version: ${{ matrix.nodejs_version }}
+#            - name: Setup NodeJs Version -${{ matrix.nodejs_version }}
+#              uses: actions/setup-node@v3
+#              with: 
+#                   node-version: ${{ matrix.nodejs_version }}
             - name: Cache NPM Dependencies
               uses: actions/cache@v4
               with:
@@ -53,7 +55,7 @@ jobs:
               if: always()      # failure() && (steps.nodejs-unit-testing-step.outcome == 'Failure' || steps.nodejs-unit-testing-step.outcome == 'success')
               uses: actions/upload-artifact@v4
               with:
-                name: Mocha-Test-Result-${{ matrix.nodejs_version }}-${{ matrix.operating_system }}
+                name: Mocha-Test-Result-18-linux
                 path: test-results.xml
     code-coverage:
         name: Code Coverage
