@@ -28,12 +28,10 @@ jobs:
               with: 
                    node-version: ${{ matrix.nodejs_version }}
             - name: Cache NPM Dependencies
-              uses: actions/checkout@v3
+              uses: actions/cache@v4
               with:
                  path: node_modules
-                 key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-                 restore-keys: |
-                                ${{ runner.os }}-node-modules-                 
+                 key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}                 
             - name: Install Dependency and Unit Testing
               run: |
                    npm install
@@ -58,12 +56,10 @@ jobs:
               with: 
                    node-version: 18
             - name: Cache NPM Dependencies
-              uses: actions/checkout@v3
+              uses: actions/cache@v4
               with:
                  path: node_modules
                  key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-                 restore-keys: |
-                                ${{ runner.os }}-node-modules-
             - name: Install Dependency
               run: npm install
             - name: Code Coverage
