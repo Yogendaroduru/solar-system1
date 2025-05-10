@@ -110,6 +110,12 @@ jobs:
                       sleep 3
                     fi
                 done
+            - name: Docker Push to docker hub
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  push: true
+                  tags: ${{ vars.username }}/solar-system:${{ github.sha }}
     
 
             
