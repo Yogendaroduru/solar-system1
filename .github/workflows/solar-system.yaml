@@ -100,8 +100,16 @@ jobs:
                    -e MONGO_PASSWORD=$MONGO_PASSWORD \
                    ${{ vars.username }}/solar-system:${{ github.sha }}
 
-                echo Testing Image url using wget
-                wget -q -o - 127.0.0.1:3000/live | grep live
+                echo "Waiting for the app to start..."
+                for i in {1..10}; do
+                    if wget -qO- 127.0.0.1:3000/live | grep live; then
+                      echo "App is live!"
+                      break
+                    else
+                      echo "Waiting... ($i)"
+                      sleep 3
+                    fi
+                done
     
 
             
