@@ -23,21 +23,11 @@ jobs:
             MONGO_URL: 'mongodb://localhost:27017/superData'
             MONGO_USERNAME: non-prod-user
             MONGO_PASSWORD: non-prod-password
-#        strategy:
-#            matrix:
-#              nodejs_version: [18, 19]
-#              operating_system: [ubuntu-latest]
-#              exclude:
-#                 - nodejs_version: 18
-#                   operating_system: ubuntu-22.04
+
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4
-#            - name: Setup NodeJs Version -${{ matrix.nodejs_version }}
-#              uses: actions/setup-node@v3
-#              with: 
-#                   node-version: ${{ matrix.nodejs_version }}
             - name: Cache NPM Dependencies
               uses: actions/cache@v4
               with:
@@ -52,7 +42,7 @@ jobs:
               id: nodejs-unit-testing-step
               run: npm test
             - name: Archive Test Result
-              if: always()      # failure() && (steps.nodejs-unit-testing-step.outcome == 'Failure' || steps.nodejs-unit-testing-step.outcome == 'success')
+              if: always()     
               uses: actions/upload-artifact@v4
               with:
                 name: Mocha-Test-Result-18-linux
@@ -66,8 +56,6 @@ jobs:
               image: siddharth67/mongo-db:non-prod
               options:
                   --name mongo
-#              ports:
-#                - 27017:27017
         env:
             MONGO_URL: 'mongodb://mongo:27017/superData'
             MONGO_USERNAME: non-prod-user
@@ -76,10 +64,7 @@ jobs:
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4
-#            - name: Setup NodeJs Version -18
-#              uses: actions/setup-node@v3
-#              with: 
-#                   node-version: 18
+
             - name: Cache NPM Dependencies
               uses: actions/cache@v4
               with:
@@ -152,6 +137,24 @@ jobs:
                   tags: |
                       ${{ vars.username }}/solar-system:${{ github.sha }}
                       ghcr.io/yogendaroduru/solar-system:${{ github.sha }}
+    dev-deploy:
+        name: Deployment on K8S
+        needs: docker
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout 
+              uses: actions/checkout@v4
+            - name: Install kubectl CLI
+              uses: azure/setup-kubectl@v4
+              with:
+                  version: 'v1.26.0' 
+              id: install
+            - name: Fech Kubernetes cluster Details
+              run: |
+                   kubectl version --short
+                   echo "**********"
+                   kubectl get nodes
+
 
     
 
