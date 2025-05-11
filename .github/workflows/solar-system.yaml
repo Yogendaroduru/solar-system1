@@ -229,9 +229,9 @@ jobs:
                    echo "APP_INGRESS_HOST=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> "$GITHUB_OUTPUT"
             - name: Test url output using curl and JQ
               run: |
-                   echo $APP_INGRESS_HOST
+                   echo "${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}"
                    echo "****************"
-                   curl https://$APP_INGRESS_HOST/live -s -k | jq -r .status | grep -i live
+                   curl https://${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}/live -s -k | jq -r .status | grep -i live
 
 
 
