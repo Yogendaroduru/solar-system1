@@ -147,13 +147,27 @@ jobs:
             - name: Install kubectl CLI
               uses: azure/setup-kubectl@v4
               with:
-                  version: 'v1.26.0' 
-              id: install
-            - name: Kube Config set context
-              uses: azure/k8s-set-context@v4
+                  version: 'latest' 
+            - name: Start Minikube
+              id: minikube
+              uses: hiberbee/github-action-minikube@latest
               with:
-                  method: kubeconfig
-                  kubeconfig: ${{ secrets.KUBECONFIG }}
+                  profile: github
+
+            - name: Get Minikube status
+              run: minikube status
+
+            - name: Get cluster info
+              run: kubectl cluster-info
+
+            - name: Get Kubernetes pods
+              run: kubectl get nodes
+
+#            - name: Kube Config set context
+#              uses: azure/k8s-set-context@v4
+#              with:
+#                  method: kubeconfig
+#                  kubeconfig: ${{ secrets.KUBECONFIG }}
             - name: Fech Kubernetes cluster Details
               run: |
                    kubectl version --short
