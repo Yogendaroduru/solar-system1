@@ -149,11 +149,17 @@ jobs:
               with:
                   version: 'v1.26.0' 
               id: install
+            - name: Kube Config set context
+              uses: azure/k8s-set-context@v4
+              with:
+                  method: kubeconfig
+                  kubeconfig: ${{ secrets.KUBECONFIG }}
             - name: Fech Kubernetes cluster Details
               run: |
                    kubectl version --short
                    echo "**********"
                    kubectl get nodes
+              
 
 
     
