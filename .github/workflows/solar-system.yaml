@@ -239,8 +239,7 @@ jobs:
                     echo "$APP_INGRESS_HOST"
                     echo "****************"
                     curl -v https://$APP_INGRESS_HOST/live -s -k
-                    echo "****************"
-                    curl https://$APP_INGRESS_HOST/live -s -k | jq -r .status | grep -i live
+
 
 
          
