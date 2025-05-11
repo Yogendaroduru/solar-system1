@@ -173,25 +173,39 @@ jobs:
                    kubectl get pods -A
             - name: Enable Ingress Controller
               run: minikube addons enable ingress
-
+            - name: Wait for Ingress Controller to be created and ready
+              run: |
+                echo "Waiting for ingress-nginx-controller deployment to exist..."
+                for i in {1..10}; do
+                  if kubectl get deployment ingress-nginx-controller -n ingress-nginx; then
+                    break
+                  fi
+                  echo "Deployment not found yet... retrying ($i)"
+                  sleep 5
+                done
             - name: Wait for Ingress Controller to be ready
               run: |
                     echo "Waiting for ingress-nginx-controller pod to be ready..."
                     kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=90s
 
             - name: Save Nginx Ingress Controller IP as a Github Environment Variable
-              run: | 
-                   echo "INGRESS_IP=$(minikube ip)" >> $GITHUB_ENV
-                   echo "Ingress IP is $INGRESS_IP"
+              run:  echo "INGRESS_IP=$(minikube ip)" >> $GITHUB_ENV
+            - name: Verify Ingress IP (loaded from GITHUB_ENV)
+              run: echo "Ingress IP is $INGRESS_IP"
 
-#            - name: Replace Token
-#              uses: cschleiden/replace-tokens@v1
-#              with:
-#                  files: '["kubernetes/development/*.yaml"]'
-#              env:
-#                  NAMESPACE: ${{ vars.NAMESPACE }}
-#                  REPLICAS: ${{ vars.REPLICAS }}
-#                  IK8S_IMAGE: ${{ vars.USERNAME }}/solar-system:${{ github.sha }}
+            - name: Replace Token
+              uses: cschleiden/replace-tokens@v1
+              with:
+                  files: '["kubernetes/development/*.yaml"]'
+              env:
+                  NAMESPACE: ${{ vars.NAMESPACE }}
+                  REPLICAS: ${{ vars.REPLICAS }}
+                  IK8S_IMAGE: ${{ vars.USERNAME }}/solar-system:${{ github.sha }}
+                  INGRESS_IP: ${{ env.INGRESS_IP }}
+            - name: Check Files
+              run: cat kubernetes/development/*.yaml
+
+
          
 
                                                          
