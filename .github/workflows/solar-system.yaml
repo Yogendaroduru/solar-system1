@@ -219,7 +219,8 @@ jobs:
                   -o yaml | kubectl apply -f -
             - name: Deploy K8s Manifest
               run: kubectl apply -f kubernetes/development
-            - name
+            - name: Sleep
+              run: 100s
 
 
          
