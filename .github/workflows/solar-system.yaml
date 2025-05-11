@@ -222,7 +222,13 @@ jobs:
             - name: Deploy K8s Manifest
               run: kubectl apply -f kubernetes/development
             - name: Sleep
-              run: sleep 5
+              run: sleep 10
+            - name: Curl directly via service (bypass Ingress)
+              run: |
+                svc_ip=$(kubectl get svc -n development solar-system -o jsonpath="{.spec.clusterIP}")
+                curl http://$svc_ip:3000/live -s
+            - name: Get development ns details
+              run: kubectl get all -n development
             - name: Set App Ingress Host URL And Integration Testing
               id: Set-Ingress-Host-Address
               run: |
