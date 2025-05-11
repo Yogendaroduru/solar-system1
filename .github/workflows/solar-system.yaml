@@ -140,6 +140,8 @@ jobs:
     dev-deploy:
         name: Deployment on K8S
         needs: docker
+#        outputs:
+#            APP_INGRESS_URL: ${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}
         runs-on: ubuntu-latest
         steps:
             - name: Checkout 
@@ -220,7 +222,17 @@ jobs:
             - name: Deploy K8s Manifest
               run: kubectl apply -f kubernetes/development
             - name: Sleep
-              run: 100s
+              run: sleep 5
+            - name: Set App Ingress Host URL
+              id: Set-Ingress-Host-Address
+              run: |
+                   echo "APP_INGRESS_HOST=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> "$GITHUB_OUTPUT"
+            - name: Test url output using curl and JQ
+              run: |
+                   echo $APP_INGRESS_HOST
+                   echo "****************"
+                   curl https://$APP_INGRESS_HOST/live -s -k | jq -r .status | grep -i live
+
 
 
          
