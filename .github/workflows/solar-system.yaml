@@ -223,16 +223,18 @@ jobs:
               run: kubectl apply -f kubernetes/development
             - name: Sleep
               run: sleep 5
-            - name: Set App Ingress Host URL
+            - name: Set App Ingress Host URL And Integration Testing
               id: Set-Ingress-Host-Address
               run: |
                    echo "APP_INGRESS_HOST=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> "$GITHUB_OUTPUT"
             - name: Test url output using curl and JQ
               run: |
-                   echo "${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}"
-                   echo "****************"
-                   curl https://${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}/live -s -k | jq -r .status | grep -i live
-
+                   APP_INGRESS_HOST="${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}"
+                    echo "$APP_INGRESS_HOST"
+                    echo "****************"
+                    curl -v https://$APP_INGRESS_HOST/live -s -k
+                    echo "****************"
+                    curl https://$APP_INGRESS_HOST/live -s -k | jq -r .status | grep -i live
 
 
          
