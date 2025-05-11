@@ -173,16 +173,16 @@ jobs:
                    kubectl get pods -A
             - name: Enable Ingress Controller
               run: minikube addons enable ingress
-              
+
             - name: Wait for Ingress Controller to be ready
               run: |
                     echo "Waiting for ingress-nginx-controller pod to be ready..."
-                    kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=50s
+                    kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=90s
 
             - name: Save Nginx Ingress Controller IP as a Github Environment Variable
               run: | 
-                   INGRESS_IP=$(minikube ip)
-                   env | grep INGRESS_IP
+                   echo "INGRESS_IP=$(minikube ip)" >> $GITHUB_ENV
+                   echo "Ingress IP is $INGRESS_IP"
 
 #            - name: Replace Token
 #              uses: cschleiden/replace-tokens@v1
