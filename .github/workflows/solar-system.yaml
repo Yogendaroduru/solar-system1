@@ -220,7 +220,10 @@ jobs:
                   --dry-run=client \
                   -o yaml | kubectl apply -f -
             - name: Deploy K8s Manifest
-              run: kubectl apply -f kubernetes/development
+              run: |
+                   kubectl apply -f kubernetes/development/deployment.yaml
+                   kubernetes/development/service.yaml
+                   kubernetes/development/ingress.yaml
             - name: Sleep
               run: sleep 10
             - name: Curl directly via service (bypass Ingress)
