@@ -144,6 +144,15 @@ jobs:
         steps:
             - name: Checkout 
               uses: actions/checkout@v4
+            - name: Cache Minikube
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ~/.minikube
+                      ~/.kube
+                  key: minikube-${{ runner.os }}-${{ github.ref_name }}
+                  restore-keys: |
+                      minikube-${{ runner.os }}-
             - name: Install kubectl CLI
               uses: azure/setup-kubectl@v4
               with:
@@ -153,6 +162,7 @@ jobs:
               uses: hiberbee/github-action-minikube@latest
               with:
                   profile: github
+                  driver: docker
 
             - name: Get Minikube status
               run: minikube status
@@ -163,16 +173,6 @@ jobs:
             - name: Get Kubernetes pods
               run: kubectl get nodes
 
-#            - name: Kube Config set context
-#              uses: azure/k8s-set-context@v4
-#              with:
-#                  method: kubeconfig
-#                  kubeconfig: ${{ secrets.KUBECONFIG }}
-            - name: Fech Kubernetes cluster Details
-              run: |
-                   kubectl version --short
-                   echo "**********"
-                   kubectl get nodes
               
 
 
