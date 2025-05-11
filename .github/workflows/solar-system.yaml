@@ -210,7 +210,7 @@ jobs:
               run: kubectl create ns development
             - name: Creating Mongodb Secret
               run: |
-                  kubectl -n ${{ vars.NAMESPACE }}create secret generic mongo-db-creds \
+                  kubectl -n ${{ vars.NAMESPACE }} create secret generic mongo-db-creds \
                   --from-literal=MONGO_URL=${{ env.MONGO_URL }} \
                   --from-literal=MONGO_USERNAME=${{ env.MONGO_USERNAME }} \
                   --from-literal=MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
@@ -219,6 +219,7 @@ jobs:
                   -o yaml | kubectl apply -f -
             - name: Deploy K8s Manifest
               run: kubectl apply -f kubernetes/development
+            - name
 
 
          
