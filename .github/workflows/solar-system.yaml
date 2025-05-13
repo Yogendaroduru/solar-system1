@@ -140,6 +140,9 @@ jobs:
     dev-deploy:
         name: Deployment on K8S
         needs: docker
+        environment:
+            name: development
+            url: https://${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}
 #        outputs:
 #            APP_INGRESS_URL: ${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}
         runs-on: ubuntu-latest
