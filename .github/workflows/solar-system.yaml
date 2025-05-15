@@ -142,6 +142,9 @@ jobs:
         if: contains(github.ref, 'feature/')
         needs: docker
         uses: Yogendaroduru/solar-system1/.github/workflows/resuable-deploy.yaml
+        with:
+              environment: development
+              version: ${{ github.sha }}
 
     prod-deploy:
         if: github.ref == 'refs/heads/main'
