@@ -142,7 +142,7 @@ jobs:
         if: contains(github.ref, 'feature/')
         name: Deployment on K8S
         needs: docker
-        uses: .github/workflows/resuable-deploy.yaml
+        uses: ./.github/workflows/resuable-deploy.yaml
     prod-deploy:
         if: github.ref == 'refs/heads/main'
         name: Production on K8S
