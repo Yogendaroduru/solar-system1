@@ -1,0 +1,106 @@
+name: Deployment - Resuable workflow
+
+on: workflow_call
+
+jobs:
+    reuse-wrokflow:
+       environment:
+            name: development
+            url: https://${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout 
+              uses: actions/checkout@v4
+            - name: Cache Minikube
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ~/.minikube
+                      ~/.kube
+                  key: minikube-${{ runner.os }}-${{ github.ref_name }}
+                  restore-keys: |
+                      minikube-${{ runner.os }}-
+            - name: Install kubectl CLI
+              uses: azure/setup-kubectl@v4
+              with:
+                  version: 'v1.24.3' 
+            - name: Start Minikube
+              id: minikube
+              uses: hiberbee/github-action-minikube@latest
+              with:
+                  profile: github
+                  driver: docker
+
+            - name: Get Minikube status
+              run: minikube status
+
+            - name: Get Kubernetes pods
+              run: |
+                   kubectl get nodes
+                   kubectl get pods -A
+            - name: Enable Ingress Controller
+              run: minikube addons enable ingress
+            - name: Wait for Ingress Controller to be created and ready
+              run: |
+                echo "Waiting for ingress-nginx-controller deployment to exist..."
+                for i in {1..10}; do
+                  if kubectl get deployment ingress-nginx-controller -n ingress-nginx; then
+                    break
+                  fi
+                  echo "Deployment not found yet... retrying ($i)"
+                  sleep 5
+                done
+            - name: Wait for Ingress Controller to be ready
+              run: |
+                    echo "Waiting for ingress-nginx-controller pod to be ready..."
+                    kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=90s
+
+            - name: Save Nginx Ingress Controller IP as a Github Environment Variable
+              run:  echo "INGRESS_IP=$(minikube ip)" >> $GITHUB_ENV
+            - name: Verify Ingress IP (loaded from GITHUB_ENV)
+              run: echo "Ingress IP is $INGRESS_IP"
+
+            - name: Replace Token
+              uses: cschleiden/replace-tokens@v1
+              with:
+                  files: '["kubernetes/development/*.yaml"]'
+                  tokenPrefix: '##'
+                  tokenSuffix: '##'
+              env:
+                  NAMESPACE: ${{ vars.NAMESPACE }}
+                  REPLICAS: ${{ vars.REPLICAS }}
+                  K8S_IMAGE: ${{ vars.USERNAME }}/solar-system:${{ github.sha }}
+                  INGRESS_IP: ${{ env.INGRESS_IP }}
+            - name: Check Files
+              run: cat kubernetes/development/*.yaml
+            - name: Create Namespace
+              run: kubectl create ns development
+            - name: Creating Mongodb Secret
+              run: |
+                  kubectl -n ${{ vars.NAMESPACE }} create secret generic mongo-db-creds \
+                  --from-literal=MONGO_URL=${{ env.MONGO_URL }} \
+                  --from-literal=MONGO_USERNAME=${{ env.MONGO_USERNAME }} \
+                  --from-literal=MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
+                  --save-config \
+                  --dry-run=client \
+                  -o yaml | kubectl apply -f -
+            - name: Deploy K8s Manifest
+              run: |
+                   kubectl apply -f kubernetes/development/deployment.yaml
+                   kubectl apply -f kubernetes/development/service.yaml
+                   kubectl apply -f kubernetes/development/ingress.yaml
+            - name: Sleep
+              run: sleep 10
+            - name: Get development ns details
+              run: kubectl get all -n development
+            - name: Set App Ingress Host URL And Integration Testing
+              id: Set-Ingress-Host-Address
+              run: |
+                   echo "APP_INGRESS_HOST=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath="{.items[0].spec.tls[0].hosts[0]}")" >> "$GITHUB_OUTPUT"
+            - name: Test url output using curl and JQ
+              run: |
+                   APP_INGRESS_HOST="${{ steps.Set-Ingress-Host-Address.outputs.APP_INGRESS_HOST }}"
+                    echo "$APP_INGRESS_HOST"
+                    echo "****************"
+                    curl -v https://$APP_INGRESS_HOST/live -s -k
+        
