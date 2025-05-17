@@ -29,16 +29,12 @@ jobs:
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4
-            - name: Cache NPM Dependencies
-              uses: actions/cache@v4
-              with:
-                 path: node_modules
-                 key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}    
 
-            - name: Install Dependency and Unit Testing
-              run: |
-                   npm install
-                   env | grep MONGO
+            - name: Composit Action 
+              uses: ./.github/custom-actions/npm-action/action.yaml
+              with:
+                 path-of-folder: node_modules
+                 
             - name: Unit Testing
               id: nodejs-unit-testing-step
               run: npm test
@@ -66,13 +62,11 @@ jobs:
             - name: Checkout Repository
               uses: actions/checkout@v4
 
-            - name: Cache NPM Dependencies
-              uses: actions/cache@v4
+            - name: Composit Action 
+              uses: ./.github/custom-actions/npm-action/
               with:
-                 path: node_modules
-                 key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-            - name: Install Dependency
-              run: npm install
+                 path-of-folder: node_modules
+
             - name: Code Coverage
               continue-on-error: true
               run: npm run coverage
