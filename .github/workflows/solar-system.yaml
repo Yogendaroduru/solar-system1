@@ -81,7 +81,7 @@ jobs:
         needs: [unit-testing, code-coverage]
         permissions:
              packages: write
-        runs-on: ubuntu-latest
+        runs-on: [self-hosted, Linux, prod]
         steps:
             - name: Checkout 
               uses: actions/checkout@v4
